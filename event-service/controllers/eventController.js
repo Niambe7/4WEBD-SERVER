@@ -17,6 +17,10 @@ exports.createEvent = async (req, res) => {
         price,
         image
       });
+
+      if (event.image) {
+        event.image = event.image.replace(/\\/g, '/');
+      }
       
       res.status(201).json({ message: 'Événement créé avec succès', event });
     } catch (error) {
@@ -47,15 +51,28 @@ exports.getEventById = async (req, res) => {
 
 // Mettre à jour un événement
 exports.updateEvent = async (req, res) => {
-  try {
-    const event = await Event.findByPk(req.params.id);
-    if (!event) return res.status(404).json({ message: 'Événement non trouvé' });
-    await event.update(req.body);
-    res.json({ message: 'Événement mis à jour', event });
-  } catch (error) {
-    res.status(400).json({ message: error.message });
-  }
-};
+    try {
+      console.log("Données form-data reçues:", req.body);
+      if (req.file) {
+        console.log("Fichier reçu:", req.file);
+      }
+      const event = await Event.findByPk(req.params.id);
+      if (!event) return res.status(404).json({ message: 'Événement non trouvé' });
+  
+      // Si un nouveau fichier a été envoyé, mettez à jour la valeur de l'image, sinon laissez l'existante
+      const updateData = { ...req.body };
+      if (req.file) {
+        updateData.image = req.file.path; // ou éventuellement normaliser le chemin
+      }
+  
+      await event.update(updateData);
+      res.json({ message: 'Événement mis à jour', event });
+    } catch (error) {
+      console.error("Erreur lors de l'update:", error);
+      res.status(400).json({ message: error.message });
+    }
+  };
+  
 
 // Supprimer un événement
 exports.deleteEvent = async (req, res) => {

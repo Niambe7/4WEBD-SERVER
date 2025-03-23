@@ -9,7 +9,7 @@ router.post('/', upload.single('image'), authMiddleware, eventController.createE
 // Exemple : protéger la création d'un événement
 router.get('/', eventController.getAllEvents);
 router.get('/:id', eventController.getEventById);
-router.put('/:id', authMiddleware, eventController.updateEvent);
+router.put('/:id', upload.single('image'), authMiddleware, eventController.updateEvent);
 router.delete('/:id', authMiddleware, eventController.deleteEvent);
 
 module.exports = router;
