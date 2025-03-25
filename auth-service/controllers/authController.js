@@ -4,10 +4,10 @@ const jwt = require('jsonwebtoken');
 
 exports.register = async (req, res) => {
   try {
-    const { firstname, lastname, email, phone, password } = req.body;
+    const { firstname, lastname, email, phone, password , role } = req.body;
     // Vous pouvez ajouter ici des validations supplémentaires
 
-    const user = await User.create({ firstname, lastname, email, phone, password });
+    const user = await User.create({ firstname, lastname, email, phone, password , role: role || 'user'  });
     res.status(201).json({ message: "Utilisateur créé avec succès", user });
   } catch (error) {
     res.status(400).json({ message: error.message });
