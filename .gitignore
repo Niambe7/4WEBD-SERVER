@@ -2,3 +2,4 @@
 /auth-service/node_modules
 /event-service/node_modules
 /event-service/uploads
+/ticket-service/node_modules

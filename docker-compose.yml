@@ -1,0 +1,60 @@
+services:
+  postgres:
+    image: postgres:13
+    restart: always
+    environment:
+      POSTGRES_USER: Supmap
+      POSTGRES_PASSWORD: niambe
+      POSTGRES_DB: 4webd
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U Supmap"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  auth-service:
+    build: ./auth-service
+    env_file: ./auth-service/.env.docker.auth
+    ports:
+      - "7002:7002"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  user-service:
+    build: ./user-service
+    env_file: ./user-service/.env.docker.user
+    ports:
+      - "7000:7000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  event-service:
+    build: ./event-service
+    env_file: ./event-service/.env.docker.event
+    ports:
+      - "7004:7004"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  ticket-service:
+    build: ./ticket-service
+    env_file: ./ticket-service/.env.docker.event
+    ports:
+      - "7006:7006"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      event-service:
+        condition: service_started
+    environment:
+      - STRIPE_SECRET_KEY=sk_test_51R5s20BBgWSh6fiDZpLGkeLfSH2R6yEdSDtuNjKgb7Up9b28BJeyIQlExm9pk0MmHWicB67IjvfagQ3xzlKJ1z57007mGlYPvu
+
+volumes:
+  postgres_data:

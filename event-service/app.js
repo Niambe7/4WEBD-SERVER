@@ -1,5 +1,6 @@
-// app.js
-require('dotenv').config();
+if (!process.env.DB_NAME) {
+  require('dotenv').config();
+}
 const express = require('express');
 const { sequelize } = require('./models/index');
 const eventRoutes = require('./routes/eventRoutes');
