@@ -1,0 +1,200 @@
+openapi: 3.0.0
+info:
+  title: 4webd API - Documentation Globale
+  version: "1.0.0"
+  description: >
+    Documentation agrégée pour l'Auth Service (port 7002), User Service (port 7000),
+    Event Service (port 7004) et Ticket Service (port 7006).
+servers:
+  - url: http://localhost:7002
+    description: Auth Service
+  - url: http://localhost:7000
+    description: User Service
+  - url: http://localhost:7004
+    description: Event Service
+  - url: http://localhost:7006
+    description: Ticket Service
+
+paths:
+  /auth/register:
+    post:
+      summary: Créer un nouvel utilisateur
+      tags:
+        - Auth
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                firstname:
+                  type: string
+                  example: "John"
+                lastname:
+                  type: string
+                  example: "Doe"
+                email:
+                  type: string
+                  example: "john.doe@example.com"
+                phone:
+                  type: string
+                  example: "0123456789"
+                password:
+                  type: string
+                  example: "secret"
+                role:
+                  type: string
+                  enum: [admin, user]
+                  example: "admin"
+      responses:
+        '201':
+          description: Utilisateur créé avec succès
+  /auth/login:
+    post:
+      summary: Connexion utilisateur
+      tags:
+        - Auth
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  example: "john.doe@example.com"
+                password:
+                  type: string
+                  example: "secret"
+      responses:
+        '200':
+          description: Connexion réussie, retourne un token JWT
+  /users:
+    get:
+      summary: Récupérer tous les utilisateurs
+      tags:
+        - User
+      responses:
+        '200':
+          description: Liste des utilisateurs
+    post:
+      summary: Créer un utilisateur
+      tags:
+        - User
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                firstname:
+                  type: string
+                  example: "John"
+                lastname:
+                  type: string
+                  example: "Doe"
+                email:
+                  type: string
+                  example: "john.doe@example.com"
+                phone:
+                  type: string
+                  example: "0123456789"
+                password:
+                  type: string
+                  example: "secret"
+                role:
+                  type: string
+                  enum: [admin, user]
+                  example: "user"
+      responses:
+        '201':
+          description: Utilisateur créé
+  /events:
+    get:
+      summary: Récupérer tous les événements
+      tags:
+        - Events
+      responses:
+        '200':
+          description: Liste des événements
+    post:
+      summary: Créer un événement
+      tags:
+        - Events
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                  example: "Concert de Rock"
+                date:
+                  type: string
+                  format: date-time
+                  example: "2025-06-15T20:00:00.000Z"
+                venue:
+                  type: string
+                  example: "Stade de France"
+                artist:
+                  type: string
+                  example: "John Sno"
+                price:
+                  type: number
+                  format: float
+                  example: 50.0
+                image:
+                  type: string
+                  format: binary
+      responses:
+        '201':
+          description: Événement créé avec succès
+  /tickets/buy:
+    post:
+      summary: Acheter un ticket (paiement Stripe)
+      tags:
+        - Tickets
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                eventId:
+                  type: integer
+                  example: 1
+                userId:
+                  type: integer
+                  example: 2
+                quantity:
+                  type: integer
+                  example: 1
+                token:
+                  type: string
+                  example: "tok_visa"
+      responses:
+        '201':
+          description: Paiement et réservation effectués avec succès
+  /tickets/user/{userId}:
+    get:
+      summary: Récupérer les tickets d'un utilisateur
+      tags:
+        - Tickets
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Liste des tickets
+          
+security:
+  - bearerAuth: []

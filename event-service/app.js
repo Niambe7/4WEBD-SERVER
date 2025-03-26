@@ -8,7 +8,7 @@ const eventRoutes = require('./routes/eventRoutes');
 const app = express();
 const cors = require('cors');
 const PORT = process.env.Node_PORT || 7004;
-app.use(cors({ origin: 'http://localhost:3000' }));
+app.use(cors({ origin: ['http://localhost:3000', 'http://localhost:7008'] }));
 app.use(express.json());
 app.use('/uploads', express.static('uploads'));
 
