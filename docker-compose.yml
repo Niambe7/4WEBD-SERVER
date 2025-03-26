@@ -65,7 +65,20 @@ services:
       - auth-service
       - user-service
       - event-service
-      - ticket-service    
+      - ticket-service
+
+
+  frontend:
+    build: ./4WEBD-FRONT
+    # Optionnel : Si tu as un fichier d'environnement spécifique pour le frontend
+    # env_file: ./frontend/.env.docker.frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - auth-service
+      - user-service
+      - event-service
+      - ticket-service        
 
 volumes:
   postgres_data:
