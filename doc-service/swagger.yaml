@@ -3,8 +3,12 @@ info:
   title: 4webd API - Documentation Globale
   version: "1.0.0"
   description: >
-    Documentation agrégée pour l'Auth Service (port 7002), User Service (port 7000),
-    Event Service (port 7004) et Ticket Service (port 7006).
+    Documentation agrégée pour les microservices :
+    - Auth Service (port 7002)
+    - User Service (port 7000)
+    - Event Service (port 7004)
+    - Ticket Service (port 7006)
+
 servers:
   - url: http://localhost:7002
     description: Auth Service
@@ -14,6 +18,178 @@ servers:
     description: Event Service
   - url: http://localhost:7006
     description: Ticket Service
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    UserRegistration:
+      type: object
+      properties:
+        firstname:
+          type: string
+          example: "John"
+        lastname:
+          type: string
+          example: "Doe"
+        email:
+          type: string
+          example: "john.doe@example.com"
+        phone:
+          type: string
+          example: "0123456789"
+        password:
+          type: string
+          example: "secret"
+        role:
+          type: string
+          enum: [admin, user]
+          example: "admin"
+      required:
+        - firstname
+        - lastname
+        - email
+        - phone
+        - password
+    UserLogin:
+      type: object
+      properties:
+        email:
+          type: string
+          example: "john.doe@example.com"
+        password:
+          type: string
+          example: "secret"
+      required:
+        - email
+        - password
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        firstname:
+          type: string
+          example: "John"
+        lastname:
+          type: string
+          example: "Doe"
+        email:
+          type: string
+          example: "john.doe@example.com"
+        phone:
+          type: string
+          example: "0123456789"
+        role:
+          type: string
+          enum: [admin, user]
+          example: "admin"
+        createdAt:
+          type: string
+          format: date-time
+          example: "2025-06-15T20:00:00.000Z"
+        updatedAt:
+          type: string
+          format: date-time
+          example: "2025-06-15T20:00:00.000Z"
+    Event:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        title:
+          type: string
+          example: "Concert de Rock"
+        date:
+          type: string
+          format: date-time
+          example: "2025-06-15T20:00:00.000Z"
+        venue:
+          type: string
+          example: "Stade de France"
+        artist:
+          type: string
+          example: "John Sno"
+        price:
+          type: number
+          format: float
+          example: 50.0
+        image:
+          type: string
+          example: "uploads/event-1742738938317-593740077.png"
+        createdAt:
+          type: string
+          format: date-time
+          example: "2025-03-23T14:08:58.326Z"
+        updatedAt:
+          type: string
+          format: date-time
+          example: "2025-03-23T14:08:58.326Z"
+    TicketPurchase:
+      type: object
+      properties:
+        eventId:
+          type: integer
+          example: 1
+        userId:
+          type: integer
+          example: 2
+        quantity:
+          type: integer
+          example: 1
+        token:
+          type: string
+          example: "tok_visa"
+      required:
+        - eventId
+        - userId
+        - quantity
+        - token
+    Ticket:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        eventId:
+          type: integer
+          example: 1
+        userId:
+          type: integer
+          example: 2
+        quantity:
+          type: integer
+          example: 1
+        purchaseDate:
+          type: string
+          format: date-time
+          example: "2025-03-23T17:25:29.397Z"
+        eventTitle:
+          type: string
+          example: "Concert de Rock"
+        eventDate:
+          type: string
+          format: date-time
+          example: "2025-06-15T20:00:00.000Z"
+        eventVenue:
+          type: string
+          example: "Stade de France"
+        eventImage:
+          type: string
+          example: "http://event-service:7004/uploads/event-1742738938317-593740077.png"
+        createdAt:
+          type: string
+          format: date-time
+          example: "2025-03-23T17:25:29.397Z"
+        updatedAt:
+          type: string
+          format: date-time
+          example: "2025-03-23T17:25:29.397Z"
 
 paths:
   /auth/register:
@@ -26,30 +202,22 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                firstname:
-                  type: string
-                  example: "John"
-                lastname:
-                  type: string
-                  example: "Doe"
-                email:
-                  type: string
-                  example: "john.doe@example.com"
-                phone:
-                  type: string
-                  example: "0123456789"
-                password:
-                  type: string
-                  example: "secret"
-                role:
-                  type: string
-                  enum: [admin, user]
-                  example: "admin"
+              $ref: '#/components/schemas/UserRegistration'
       responses:
         '201':
           description: Utilisateur créé avec succès
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  user:
+                    $ref: '#/components/schemas/User'
+        '400':
+          description: Requête invalide
+
   /auth/login:
     post:
       summary: Connexion utilisateur
@@ -60,17 +228,22 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                email:
-                  type: string
-                  example: "john.doe@example.com"
-                password:
-                  type: string
-                  example: "secret"
+              $ref: '#/components/schemas/UserLogin'
       responses:
         '200':
           description: Connexion réussie, retourne un token JWT
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  token:
+                    type: string
+        '401':
+          description: Authentification échouée
+
   /users:
     get:
       summary: Récupérer tous les utilisateurs
@@ -79,6 +252,12 @@ paths:
       responses:
         '200':
           description: Liste des utilisateurs
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
     post:
       summary: Créer un utilisateur
       tags:
@@ -88,30 +267,77 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                firstname:
-                  type: string
-                  example: "John"
-                lastname:
-                  type: string
-                  example: "Doe"
-                email:
-                  type: string
-                  example: "john.doe@example.com"
-                phone:
-                  type: string
-                  example: "0123456789"
-                password:
-                  type: string
-                  example: "secret"
-                role:
-                  type: string
-                  enum: [admin, user]
-                  example: "user"
+              $ref: '#/components/schemas/UserRegistration'
       responses:
         '201':
           description: Utilisateur créé
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+  /users/{id}:
+    get:
+      summary: Récupérer un utilisateur par ID
+      tags:
+        - User
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Détails de l'utilisateur
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '404':
+          description: Utilisateur non trouvé
+    put:
+      summary: Mettre à jour un utilisateur
+      tags:
+        - User
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRegistration'
+      responses:
+        '200':
+          description: Utilisateur mis à jour
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: Requête invalide
+    delete:
+      summary: Supprimer un utilisateur
+      tags:
+        - User
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Utilisateur supprimé
+
   /events:
     get:
       summary: Récupérer tous les événements
@@ -120,10 +346,18 @@ paths:
       responses:
         '200':
           description: Liste des événements
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Event'
     post:
       summary: Créer un événement
       tags:
         - Events
+      security:
+        - bearerAuth: []
       requestBody:
         required: true
         content:
@@ -154,6 +388,98 @@ paths:
       responses:
         '201':
           description: Événement créé avec succès
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Event'
+        '400':
+          description: Requête invalide
+  /events/{id}:
+    get:
+      summary: Récupérer un événement par ID
+      tags:
+        - Events
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Détails de l'événement
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Event'
+        '404':
+          description: Événement non trouvé
+    put:
+      summary: Mettre à jour un événement
+      tags:
+        - Events
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                  example: "Concert mis à jour"
+                date:
+                  type: string
+                  format: date-time
+                  example: "2025-06-20T20:00:00.000Z"
+                venue:
+                  type: string
+                  example: "Nouveau Stade"
+                artist:
+                  type: string
+                  example: "John Sno"
+                price:
+                  type: number
+                  format: float
+                  example: 55.0
+                image:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: Événement mis à jour
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Event'
+        '400':
+          description: Requête invalide
+    delete:
+      summary: Supprimer un événement
+      tags:
+        - Events
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Événement supprimé avec succès
+        '404':
+          description: Événement non trouvé
+
   /tickets/buy:
     post:
       summary: Acheter un ticket (paiement Stripe)
@@ -164,23 +490,33 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                eventId:
-                  type: integer
-                  example: 1
-                userId:
-                  type: integer
-                  example: 2
-                quantity:
-                  type: integer
-                  example: 1
-                token:
-                  type: string
-                  example: "tok_visa"
+              $ref: '#/components/schemas/TicketPurchase'
+            examples:
+              buyTicketExample:
+                value:
+                  eventId: 1
+                  userId: 2
+                  quantity: 1
+                  token: "tok_visa"
       responses:
         '201':
           description: Paiement et réservation effectués avec succès
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  ticket:
+                    $ref: '#/components/schemas/Ticket'
+                  charge:
+                    type: object
+                    description: Objet de réponse Stripe (exemple simplifié)
+        '400':
+          description: Requête invalide
+        '500':
+          description: Erreur côté serveur lors du paiement
   /tickets/user/{userId}:
     get:
       summary: Récupérer les tickets d'un utilisateur
@@ -195,6 +531,12 @@ paths:
       responses:
         '200':
           description: Liste des tickets
-          
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Ticket'
+
 security:
   - bearerAuth: []

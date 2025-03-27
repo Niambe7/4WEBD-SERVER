@@ -56,6 +56,16 @@ services:
     environment:
       - STRIPE_SECRET_KEY=sk_test_51R5s20BBgWSh6fiDZpLGkeLfSH2R6yEdSDtuNjKgb7Up9b28BJeyIQlExm9pk0MmHWicB67IjvfagQ3xzlKJ1z57007mGlYPvu
 
+  notif-service:
+    build: ./notif-service
+    ports:
+      - "7007:7007"
+    depends_on:
+      - auth-service
+      - user-service
+      - event-service
+      - ticket-service    
+
   doc-service:
     build: ./doc-service
     # Si besoin, tu peux définir un env_file pour le doc-service, sinon pas nécessaire

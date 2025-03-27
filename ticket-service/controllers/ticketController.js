@@ -46,7 +46,24 @@ exports.buyTicket = async (req, res) => {
       eventImage: eventImageUrl
     });
 
-    res.status(201).json({ message: 'Paiement et réservation effectués avec succès', ticket, charge });
+    // Récupérer les informations de l'utilisateur depuis le user-service
+    const userResponse = await axios.get(`http://user-service:7000/users/${userId}`);
+    const user = userResponse.data;
+    const email = user.email;
+
+    // Préparer le contenu du mail de confirmation
+    const subject = "Confirmation d'achat de ticket";
+    const text = `Bonjour ${user.firstname},\n\nVotre achat de ticket pour l'événement "${event.title}" a été confirmé.\nMerci !`;
+
+    // Appeler notif-service pour envoyer l'email
+    await axios.post(`http://notif-service:7007/notif/send`, {
+      to: email,
+      subject: subject,
+      text: text
+    });
+
+
+    res.status(201).json({ message: 'Paiement , réservation et notification effectués avec succès', ticket, charge });
   } catch (error) {
     console.error("Erreur lors de l'achat de billet :", error.response ? error.response.data : error);
     res.status(500).json({ message: 'Erreur lors du paiement ou de la réservation', error: error.message });
